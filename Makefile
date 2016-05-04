@@ -1,5 +1,6 @@
 #Define general target
 MCU = atmega328p
+MCU_AVRDUDE = atmega328p
 TARGETNAME = Product
 EXTENSION = elf
 FORMAT = ihex
@@ -12,13 +13,14 @@ OBJCOPY = avr-objcopy
 AVRDUDE = avrdude
 
 #Define directory
-AVRDIR = ../../hardware/arduino/avr
+AVRDIR = lib/hardware/arduino/avr
 LIBDIR = $(AVRDIR)/cores/arduino
-PLATFORMDIR = ../../hardware/tools/avr/avr/include/avr
+PLATFORMDIR = lib/hardware/tools/avr/avr/include/avr
 ADEFS =
 CINCLUDES = -I $(LIBDIR) \
 			-I $(AVRDIR)/variants/standard \
-			-I $(PLATFORMDIR)
+			-I $(PLATFORMDIR) \
+			-I $(PLATFORMDIR)/../util
 			
 			
 #Define source code
@@ -36,21 +38,14 @@ LIBCOBJS = $(subst .c,.o,$(LIBCSRCS))
 COBJS = $(subst .c,.o,$(CSOURCES))
 
 #Define preprocesor
-CDEFS = -D$(MCU) -DF_CPU=16000000UL -DF_CLOCK=16000000UL -DBAUDRATE=19200 -D__AVR_ATmega3250__
-CDEFS += -DBOARD=BOARD_USER
-CDEFS += -DBOOT_START_ADDR=$(BOOT_START)UL
-CDEFS += -DTX_RX_LED_PULSE_MS=3
-
-BOOT_START = 0x1000
-#PID for UNO
-ARDUINO_MODEL_PID = 0x0001
+CDEFS = -D$(MCU) -DF_CPU=16000000UL -D__AVR_ATmega328P__
 COPTIMIZE = -Os -funsigned-char -funsigned-bitfields -fno-inline-small-functions
 
 #Define compiler options
-CFLAGS = -mmcu=$(MCU) -g -Wall -Wcpp -std=gnu99 $(COPTIMIZE) $(CDEFS) $(CINCLUDES)
+CFLAGS = -mmcu=$(MCU) -g -Wall -std=c99 $(COPTIMIZE) $(CDEFS) $(CINCLUDES)
 
-LDFLAGS = -Wl,-Map,$(TARGET).map,--section-start=.text=$(BOOT_START)
-ARFLAGS = -r
+LDFLAGS = -Wl,-Map,$(TARGET).map
+ARFLAGS = rcs
 
 #---------------- Programming Options (avrdude) ----------------
 # Fuse settings for Arduino Uno DFU bootloader project
@@ -60,13 +55,16 @@ AVRDUDE_FUSES = -U efuse:w:0xF4:m -U hfuse:w:0xD9:m -U lfuse:w:0xFF:m
 AVRDUDE_LOCK = -U lock:w:0x0F:m
 
 # Programming hardware
-AVRDUDE_PROGRAMMER = avrispmkii
+AVRDUDE_PROGRAMMER = arduino
 
 # com1 = serial port. Use lpt1 to connect to parallel port.
-AVRDUDE_PORT = usb
+AVRDUDE_PORT = com4
 AVRDUDE_WRITE_FLASH = -U flash:w:$(TARGET).hex
 
-AVRDUDE_FLAGS = -p $(MCU_AVRDUDE) -F -P $(AVRDUDE_PORT) -c $(AVRDUDE_PROGRAMMER)
+# Config file location
+AVRDUDE_CFG_LOCATION = lib/hardware/tools/avr/etc/avrdude.conf
+
+AVRDUDE_FLAGS = -p $(MCU_AVRDUDE) -F -P $(AVRDUDE_PORT) -c $(AVRDUDE_PROGRAMMER) -C $(AVRDUDE_CFG_LOCATION) -b 115200
 
 #Build process
 all: $(LIB) $(TARGET).$(EXTENSION) hex
@@ -78,7 +76,7 @@ $(LIB): $(LIBCOBJS)
 	$(AR) $(ARFLAGS) $@ $^
 
 program: $(TARGET).hex $(TARGET).eep
-	$(AVRDUDE) $(AVRDUDE_FLAGS) $(AVRDUDE_WRITE_FLASH) $(AVRDUDE_WRITE_EEPROM) $(AVRDUDE_FUSES) $(AVRDUDE_LOCK)
+	$(AVRDUDE) $(AVRDUDE_FLAGS) $(AVRDUDE_WRITE_FLASH) $(AVRDUDE_WRITE_EEPROM)
 clean:
 	rm -rf *.s *.hex *.elf *.map *.eep *.lib
 	rm -rf $(COBJS) $(LIBCOBJS)
