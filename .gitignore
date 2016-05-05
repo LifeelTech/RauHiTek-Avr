@@ -1,0 +1,12 @@
+Product.elf.elf
+Product.elf.hex
+Product.elf.map
+app/main.o
+avr-lib.lib
+brightness/brightness.o
+humidity/humidity.o
+lib/hardware/arduino/avr/cores/arduino/WInterrupts.o
+lib/hardware/arduino/avr/cores/arduino/hooks.o
+lib/hardware/arduino/avr/cores/arduino/wiring.o
+lib/hardware/arduino/avr/cores/arduino/wiring_digital.o
+thermistor/thermistor.o
