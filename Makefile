@@ -1,3 +1,7 @@
+#Parameter for avrdude port
+PORT =
+DEBUG =
+
 #Define general target
 MCU = atmega328p
 MCU_AVRDUDE = atmega328p
@@ -20,30 +24,44 @@ ADEFS =
 CINCLUDES = -I $(LIBDIR) \
 			-I $(AVRDIR)/variants/standard \
 			-I $(PLATFORMDIR) \
-			-I $(PLATFORMDIR)/../util
-			
-			
+			-I $(PLATFORMDIR)/../util \
+			-I thermistor \
+			-I humidity \
+			-I brightness \
+			-I $(PLATFORMDIR)/..
+
 #Define source code
-CSOURCES = app/main.c \
-			thermistor/thermistor.c \
+CSOURCES = thermistor/thermistor.c \
 			humidity/humidity.c \
 			brightness/brightness.c
-LIB = avr-lib.lib
+CXXSOURCES = app/main.cpp
+
+LIBC = avr-lib.lib
+LIBCXX = avr-libxx.lib
 LIBCSRCS = $(LIBDIR)/wiring.c \
 			$(LIBDIR)/wiring_digital.c \
+			$(LIBDIR)/wiring_analog.c \
 			$(LIBDIR)/WInterrupts.c \
 			$(LIBDIR)/hooks.c
-
+ifeq ($(DEBUG),1)
+LIBCXXSRCS = $(LIBDIR)/HardwareSerial.cpp \
+			$(LIBDIR)/HardwareSerial0.cpp \
+			$(LIBDIR)/CDC.cpp
+LIBCXXOBJS = $(subst .cpp,.o,$(LIBCXXSRCS))
+endif
 LIBCOBJS = $(subst .c,.o,$(LIBCSRCS))
 COBJS = $(subst .c,.o,$(CSOURCES))
+CXXOBJS = $(subst .cpp,.o,$(CXXSOURCES))
 
 #Define preprocesor
 CDEFS = -D$(MCU) -DF_CPU=16000000UL -D__AVR_ATmega328P__
 COPTIMIZE = -Os -funsigned-char -funsigned-bitfields -fno-inline-small-functions
-
 #Define compiler options
 CFLAGS = -mmcu=$(MCU) -g -Wall -std=c99 $(COPTIMIZE) $(CDEFS) $(CINCLUDES)
-
+ifeq ($(DEBUG),1)
+CXXFLAGS = -mmcu=$(MCU) -x c++ -g -Wall $(COPTIMIZE) $(CDEFS) $(CINCLUDES)
+CFLAGS += -DDEBUG_MODE 
+endif
 LDFLAGS = -Wl,-Map,$(TARGET).map
 ARFLAGS = rcs
 
@@ -58,8 +76,8 @@ AVRDUDE_LOCK = -U lock:w:0x0F:m
 AVRDUDE_PROGRAMMER = arduino
 
 # com1 = serial port. Use lpt1 to connect to parallel port.
-AVRDUDE_PORT = com4
 AVRDUDE_WRITE_FLASH = -U flash:w:$(TARGET).hex
+AVRDUDE_PORT = $(PORT)
 
 # Config file location
 AVRDUDE_CFG_LOCATION = lib/hardware/tools/avr/etc/avrdude.conf
@@ -67,12 +85,14 @@ AVRDUDE_CFG_LOCATION = lib/hardware/tools/avr/etc/avrdude.conf
 AVRDUDE_FLAGS = -p $(MCU_AVRDUDE) -F -P $(AVRDUDE_PORT) -c $(AVRDUDE_PROGRAMMER) -C $(AVRDUDE_CFG_LOCATION) -b 115200
 
 #Build process
-all: $(LIB) $(TARGET).$(EXTENSION) hex
+all: $(LIBC) $(LIBCXX) $(TARGET).$(EXTENSION) hex
 
-$(TARGET).$(EXTENSION): $(COBJS)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LIB)
+$(TARGET).$(EXTENSION): $(COBJS) $(CXXOBJS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LIBC) $(LIBCXX)
 
-$(LIB): $(LIBCOBJS)
+$(LIBC): $(LIBCOBJS)
+	$(AR) $(ARFLAGS) $@ $^
+$(LIBCXX): $(LIBCXXOBJS)
 	$(AR) $(ARFLAGS) $@ $^
 
 program: $(TARGET).hex $(TARGET).eep
@@ -89,3 +109,12 @@ hex:  $(TARGET).hex
 %.eep: %.elf
 	-$(OBJCOPY) -j .eeprom --set-section-flags=.eeprom="alloc,load" \
 	--change-section-lma .eeprom=0 --no-change-warnings -O $(FORMAT) $< $@ || exit 0
+
+%.o: %.cpp
+	$(CC) $(CFLAGS) -c -o $@ $(@:.o=.cpp)
+
+$(LIBCOBJS): $(LIBCSRCS)
+	$(CC) $(CFLAGS) -c -o $@ $(@:.o=.c)
+
+$(LIBCXXOBJS): $(LIBCXXSRCS)
+	$(CC) $(CXXFLAGS) -c -o $@ $(@:.o=.cpp)

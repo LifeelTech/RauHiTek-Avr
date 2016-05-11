@@ -5,9 +5,12 @@
  *      Author: Phu Quach
  */
 
-#ifndef VEGPURE_BRIGHTNESS_BRIGHTNESS_H_
-#define VEGPURE_BRIGHTNESS_BRIGHTNESS_H_
+#ifndef RAUHITEK_AVR_BRIGHTNESS_BRIGHTNESS_H_
+#define RAUHITEK_AVR_BRIGHTNESS_BRIGHTNESS_H_
+
+#include "stdint.h"
+
+extern float Bri_GetBrightValue (uint8_t AnalogPin);
 
 
-
-#endif /* VEGPURE_BRIGHTNESS_BRIGHTNESS_H_ */
+#endif /* RAUHITEK_AVR_BRIGHTNESS_BRIGHTNESS_H_ */

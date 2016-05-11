@@ -5,9 +5,12 @@
  *      Author: Phu Quach
  */
 
-#ifndef VEGPURE_THERMISTOR_THERMISTOR_H_
-#define VEGPURE_THERMISTOR_THERMISTOR_H_
+#ifndef RAUHITEK_AVR_THERMISTOR_THERMISTOR_H_
+#define RAUHITEK_AVR_THERMISTOR_THERMISTOR_H_
 
+#include "stdint.h"
 
+/* Declare external service */
+extern float Ther_GetTempCelsius (uint8_t AnalogPin);
 
-#endif /* VEGPURE_THERMISTOR_THERMISTOR_H_ */
+#endif /* RAUHITEK_AVR_THERMISTOR_THERMISTOR_H_ */
