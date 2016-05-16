@@ -25,15 +25,21 @@ CINCLUDES = -I $(LIBDIR) \
 			-I $(AVRDIR)/variants/standard \
 			-I $(PLATFORMDIR) \
 			-I $(PLATFORMDIR)/../util \
-			-I thermistor \
-			-I humidity \
-			-I brightness \
-			-I $(PLATFORMDIR)/..
+			-I in/thermistor \
+			-I in/moisture \
+			-I in/brightness \
+			-I out/valve \
+			-I out/light \
+			-I $(PLATFORMDIR)/.. \
+			-I $(AVRDIR)/libraries/SoftwareSerial/src/
 
 #Define source code
-CSOURCES = thermistor/thermistor.c \
-			humidity/humidity.c \
-			brightness/brightness.c
+CSOURCES = in/thermistor/thermistor.c \
+			in/moisture/moisture.c \
+			in/brightness/brightness.c \
+			out/valve/valve.c \
+			out/light/light.c
+
 CXXSOURCES = app/main.cpp
 
 LIBC = avr-lib.lib
@@ -44,9 +50,11 @@ LIBCSRCS = $(LIBDIR)/wiring.c \
 			$(LIBDIR)/WInterrupts.c \
 			$(LIBDIR)/hooks.c
 ifeq ($(DEBUG),1)
-LIBCXXSRCS = $(LIBDIR)/HardwareSerial.cpp \
-			$(LIBDIR)/HardwareSerial0.cpp \
-			$(LIBDIR)/CDC.cpp
+LIBCXXSRCS = $(AVRDIR)/libraries/SoftwareSerial/src/SoftwareSerial.cpp \
+			$(LIBDIR)/abi.cpp \
+			$(LIBDIR)/print.cpp \
+			$(LIBDIR)/HardwareSerial.cpp \
+			$(LIBDIR)/HardwareSerial0.cpp
 LIBCXXOBJS = $(subst .cpp,.o,$(LIBCXXSRCS))
 endif
 LIBCOBJS = $(subst .c,.o,$(LIBCSRCS))
@@ -54,7 +62,7 @@ COBJS = $(subst .c,.o,$(CSOURCES))
 CXXOBJS = $(subst .cpp,.o,$(CXXSOURCES))
 
 #Define preprocesor
-CDEFS = -D$(MCU) -DF_CPU=16000000UL -D__AVR_ATmega328P__
+CDEFS = -D$(MCU) -DF_CPU=16000000UL -D__AVR_ATmega328P__ -DDEBUG_MODE
 COPTIMIZE = -Os -funsigned-char -funsigned-bitfields -fno-inline-small-functions
 #Define compiler options
 CFLAGS = -mmcu=$(MCU) -g -Wall -std=c99 $(COPTIMIZE) $(CDEFS) $(CINCLUDES)
@@ -99,7 +107,7 @@ program: $(TARGET).hex $(TARGET).eep
 	$(AVRDUDE) $(AVRDUDE_FLAGS) $(AVRDUDE_WRITE_FLASH) $(AVRDUDE_WRITE_EEPROM)
 clean:
 	rm -rf *.s *.hex *.elf *.map *.eep *.lib
-	rm -rf $(COBJS) $(LIBCOBJS)
+	rm -rf $(COBJS) $(LIBCOBJS) $(CXXOBJS) $(LIBCXXOBJS)
 
 hex:  $(TARGET).hex
 
@@ -111,7 +119,7 @@ hex:  $(TARGET).hex
 	--change-section-lma .eeprom=0 --no-change-warnings -O $(FORMAT) $< $@ || exit 0
 
 %.o: %.cpp
-	$(CC) $(CFLAGS) -c -o $@ $(@:.o=.cpp)
+	$(CC) $(CXXFLAGS) -c -o $@ $(@:.o=.cpp)
 
 $(LIBCOBJS): $(LIBCSRCS)
 	$(CC) $(CFLAGS) -c -o $@ $(@:.o=.c)
