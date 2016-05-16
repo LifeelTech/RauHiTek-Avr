@@ -18,7 +18,7 @@
 
 /* List of used analog pins */
 #define	THERMISTOR_PIN		A0
-#define BRIGHTNESS_PIN			A1
+#define BRIGHTNESS_PIN		A1
 #define MOISTURE_PIN		A2
 #define VALVE_PIN			8
 #define LIGHT_PIN			9
@@ -45,6 +45,7 @@ main (void)
 void
 initialization (void)
 {
+	init();
 	pinMode(13, OUTPUT);
 	Ther_Init(THERMISTOR_PIN);
 	Bri_Init(BRIGHTNESS_PIN);
@@ -73,10 +74,16 @@ loop (void)
 	MoistureValue = Moi_GetMoistureValue();
 	if (MoistureValue < 300)
 	{
+#if defined(DEBUG_MODE)
+		Serial.println("Open valve to supply more water.");
+#endif
 		Val_Open();
 	}
 	else
 	{
+#if defined(DEBUG_MODE)
+		Serial.println("Enough water! Close valve.");
+#endif
 		Val_Close();
 	}
 
