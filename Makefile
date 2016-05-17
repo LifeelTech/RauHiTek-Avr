@@ -49,7 +49,7 @@ LIBCSRCS = $(LIBDIR)/wiring.c \
 			$(LIBDIR)/wiring_analog.c \
 			$(LIBDIR)/WInterrupts.c \
 			$(LIBDIR)/hooks.c
-ifeq ($(DEBUG),1)
+ifeq ($(DEBUG), 1)
 LIBCXXSRCS = $(AVRDIR)/libraries/SoftwareSerial/src/SoftwareSerial.cpp \
 			$(LIBDIR)/abi.cpp \
 			$(LIBDIR)/Print.cpp \
