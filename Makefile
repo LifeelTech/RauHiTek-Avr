@@ -62,14 +62,16 @@ COBJS = $(subst .c,.o,$(CSOURCES))
 CXXOBJS = $(subst .cpp,.o,$(CXXSOURCES))
 
 #Define preprocesor
-CDEFS = -D$(MCU) -DF_CPU=16000000UL -D__AVR_ATmega328P__ -DDEBUG_MODE
+CDEFS = -D$(MCU) -DF_CPU=16000000UL -D__AVR_ATmega328P__
+ifeq ($(DEBUG), 1)
+CDEFS += -DDEBUG_MODE
+endif
 COPTIMIZE = -Os -funsigned-char -funsigned-bitfields -fno-inline-small-functions
+
 #Define compiler options
 CFLAGS = -mmcu=$(MCU) -g -Wall -std=c99 $(COPTIMIZE) $(CDEFS) $(CINCLUDES)
-ifeq ($(DEBUG),1)
 CXXFLAGS = -mmcu=$(MCU) -x c++ -g -Wall $(COPTIMIZE) $(CDEFS) $(CINCLUDES)
-CFLAGS += -DDEBUG_MODE 
-endif
+
 LDFLAGS = -Wl,-Map,$(TARGET).map
 ARFLAGS = rcs
 
