@@ -52,7 +52,7 @@ LIBCSRCS = $(LIBDIR)/wiring.c \
 ifeq ($(DEBUG),1)
 LIBCXXSRCS = $(AVRDIR)/libraries/SoftwareSerial/src/SoftwareSerial.cpp \
 			$(LIBDIR)/abi.cpp \
-			$(LIBDIR)/print.cpp \
+			$(LIBDIR)/Print.cpp \
 			$(LIBDIR)/HardwareSerial.cpp \
 			$(LIBDIR)/HardwareSerial0.cpp
 LIBCXXOBJS = $(subst .cpp,.o,$(LIBCXXSRCS))
