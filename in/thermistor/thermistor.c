@@ -30,7 +30,7 @@ void
 Ther_Init (uint8_t AnalogPin)
 {
 	TherAPin = AnalogPin;
-	pinMode(TherAPin, INPUT);
+	//pinMode(TherAPin, INPUT);
 	Ther_State = 1U;
 }
 

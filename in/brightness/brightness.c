@@ -19,7 +19,7 @@ void
 Bri_Init (uint8_t AnalogPin)
 {
 	BriAPin = AnalogPin;
-	pinMode(BriAPin,INPUT);
+	//pinMode(BriAPin,INPUT);
 	Bri_State = 1U;
 }
 

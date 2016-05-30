@@ -14,6 +14,7 @@ extern "C"{
 
 #include "stdint.h"
 
+extern void Hum_Init (uint8_t AnalogPin);
 extern float Hum_GetHumidityValue (uint8_t AnalogPin);
 
 #ifdef __cplusplus

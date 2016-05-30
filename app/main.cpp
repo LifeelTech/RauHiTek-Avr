@@ -15,6 +15,11 @@
 #include "moisture.h"
 #include "valve.h"
 #include "light.h"
+#include "humidity.h"
+#include "man_cfg.h"
+//#include "wireless.h"
+
+#include "man.h"
 
 /* List of used analog pins */
 #define	THERMISTOR_PIN		A0
@@ -47,11 +52,7 @@ initialization (void)
 {
 	init();
 	pinMode(13, OUTPUT);
-	Ther_Init(THERMISTOR_PIN);
-	Bri_Init(BRIGHTNESS_PIN);
-	Moi_Init(MOISTURE_PIN);
-	Val_Init(VALVE_PIN);
-	Light_Init(LIGHT_PIN);
+	Man_Init(&ManCfgSet);
 }
 
 void
@@ -60,33 +61,39 @@ loop (void)
 	float TherCelsius, BrightValue, MoistureValue;
 
 	TherCelsius = Ther_GetTempCelsius();
+	Serial.print("Temperature = ");
+	Serial.println(TherCelsius);
 	if (TherCelsius >= 30 && TherCelsius <= 50)
 	{
 		digitalWrite(13, HIGH);   // turn the LED on (HIGH is the voltage level)
 	}
 
 	BrightValue = Bri_GetBrightValue();
+	Serial.print("Brightness Value = ");
+	Serial.println(BrightValue);
 	if (BrightValue <= 1000)
 	{
 		Light_Open();
 	}
 
 	MoistureValue = Moi_GetMoistureValue();
+	Serial.print("Moisture Value = ");
+	Serial.println(MoistureValue);
 	if (MoistureValue < 300)
 	{
 #if defined(DEBUG_MODE)
-		Serial.println("Open valve to supply more water.");
+		//Serial.print("Open valve to supply more water.");
 #endif
 		Val_Open();
 	}
 	else
 	{
 #if defined(DEBUG_MODE)
-		Serial.println("Enough water! Close valve.");
+		//Serial.println("Enough water! Close valve.");
 #endif
 		Val_Close();
 	}
-
+	Serial.println("#######################################");
 	delay(1000);              // wait for a second
 }
 

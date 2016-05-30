@@ -15,7 +15,7 @@ void
 Moi_Init (uint8_t AnalogPin)
 {
 	MoiAPin = AnalogPin;
-	pinMode(MoiAPin, INPUT);
+	//pinMode(MoiAPin, INPUT);
 	Moi_State = 1U;
 }
 

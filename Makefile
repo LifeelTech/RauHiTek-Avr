@@ -31,16 +31,24 @@ CINCLUDES = -I $(LIBDIR) \
 			-I out/valve \
 			-I out/light \
 			-I $(PLATFORMDIR)/.. \
-			-I $(AVRDIR)/libraries/SoftwareSerial/src/
+			-I $(AVRDIR)/libraries/SoftwareSerial/src/ \
+			-I manager \
+			-I diagnostic \
+			-I app \
+			-I com/wireless \
+			-I in/humidity
 
 #Define source code
 CSOURCES = in/thermistor/thermistor.c \
 			in/moisture/moisture.c \
 			in/brightness/brightness.c \
 			out/valve/valve.c \
-			out/light/light.c
+			out/light/light.c \
+			diagnostic/diagnostic.c \
+			in/humidity/humidity.c
 
-CXXSOURCES = app/main.cpp
+CXXSOURCES = app/main.cpp \
+			manager/man.cpp
 
 LIBC = avr-lib.lib
 LIBCXX = avr-libxx.lib
@@ -69,7 +77,7 @@ endif
 COPTIMIZE = -Os -funsigned-char -funsigned-bitfields -fno-inline-small-functions
 
 #Define compiler options
-CFLAGS = -mmcu=$(MCU) -g -Wall -std=c99 $(COPTIMIZE) $(CDEFS) $(CINCLUDES)
+CFLAGS = -mmcu=$(MCU) -g -Wall -std=gnu99 $(COPTIMIZE) $(CDEFS) $(CINCLUDES)
 CXXFLAGS = -mmcu=$(MCU) -x c++ -g -Wall $(COPTIMIZE) $(CDEFS) $(CINCLUDES)
 
 LDFLAGS = -Wl,-Map,$(TARGET).map
