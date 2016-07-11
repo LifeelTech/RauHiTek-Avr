@@ -8,75 +8,73 @@
 #ifndef RAUHITEK_AVR_MANAGER_MAN_H_
 #define RAUHITEK_AVR_MANAGER_MAN_H_
 
+#include "Arduino.h"
+#include "stdint.h"
+#include "std_types.h"
+#include "brightness.h"
+#include "humidity.h"
+#include "moisture.h"
+#include "thermistor.h"
+#include "valve.h"
+#include "light.h"
+
+#define MAX_ELEMENTS    2U
+#define MAX_FLOOR       5U
+
+//typedef MoistureType *MoisGroupDefType[MAX_ELEMENTS];
+//typedef ThermistorType *TherGroupDefType[MAX_ELEMENTS];
+//typedef BrightnessType *BrigGroupDefType[MAX_ELEMENTS];
+//typedef HumidityType *HumiGroupDefType[MAX_ELEMENTS];
+//typedef LightType *LighGroupDefType[MAX_ELEMENTS];
+//typedef ValveType *ValDripGroupDefType[MAX_ELEMENTS];
+//typedef ValveType *ValSprayGroupDefType[MAX_ELEMENTS];
+typedef struct {
+    uint8_t FloorId;
+//    MoisGroupDefType moisPtr;
+//    TherGroupDefType therPtr;
+//    BrigGroupDefType brigPtr;
+//    HumiGroupDefType humiPtr;
+//    LighGroupDefType lighPtr;
+//    ValDripGroupDefType dripPtr;
+//    ValSprayGroupDefType spraPtr;
+    const uint8_t *MoisChannelList;
+    const uint8_t *TherChannelList;
+    const uint8_t *BrigChannelList;
+//    uint8_t HumiChannelList[MAX_ELEMENTS];
+    const uint8_t *LighChannelList;
+    const uint8_t *DripChannelList;
+    const uint8_t *SpraChannelList;
+    uint8_t NumofMois;
+    uint8_t NumofTher;
+    uint8_t NumofBrig;
+    //uint8_t NumofHumi;
+    uint8_t NumofLigh;
+    uint8_t NumofDrip;
+    uint8_t NumofSpra;
+}Man_FloorConfigSetType;
+
+typedef struct {
+    const MoisConfigSetType *moisConfig;
+    const TherConfigSetType *therConfig;
+    const BrigConfigSetType *brigConfig;
+//    const HumiConfigSetType *humiConfig;
+    const LighConfigSetType *lighConfig;
+    const ValvConfigSetType *valveConfig;
+    const Man_FloorConfigSetType *floorConfig;
+    uint8_t NumofFloor;
+}Man_ConfigType;
+
+
 #ifdef __cplusplus
 extern "C"{
 #endif
-
-#include "stdint.h"
-//#include "wireless.h"
-
-typedef struct {
-	uint8_t UnitId;
-	uint8_t PinId;
-}Man_DeviceType;
-
-typedef Man_DeviceType Man_HumidityType;
-typedef Man_DeviceType Man_MoistureType;
-typedef Man_DeviceType Man_ThermistorType;
-typedef Man_DeviceType Man_BrightnessType;
-typedef Man_DeviceType Man_LightType;
-typedef Man_DeviceType Man_ValveType;
-typedef Man_DeviceType Man_OtherType;
-
-typedef struct {
-	uint8_t num;
-	Man_HumidityType *humiPtr;
-}Man_HumidityConfigSetType;
-
-typedef struct {
-	uint8_t num;
-	Man_MoistureType *moisPtr;
-}Man_MoistureConfigSetType;
-
-typedef struct {
-	uint8_t num;
-	Man_ThermistorType *therPtr;
-}Man_ThermistorConfigSetType;
-
-typedef struct {
-	uint8_t num;
-	Man_BrightnessType *brigPtr;
-}Man_BrightnessConfigSetType;
-
-typedef struct {
-	uint8_t num;
-	Man_LightType *lighPtr;
-}Man_LightConfigSetType;
-
-typedef struct {
-	uint8_t num;
-	Man_ValveType *vavlPtr;
-}Man_ValveConfigSetType;
-
-typedef struct {
-	uint8_t num;
-	Man_OtherType *otherPtr;
-}Man_OtherConfigSetType;
-
-typedef struct {
-	Man_MoistureConfigSetType *moisConfig;
-	Man_ThermistorConfigSetType *therConfig;
-	Man_BrightnessConfigSetType *brigConfig;
-	Man_HumidityConfigSetType *humiConfig;
-	Man_LightConfigSetType *lighConfig;
-	Man_ValveConfigSetType *valvConfig;
-	Man_OtherConfigSetType *otheConfig;
-//	const Wifi_ConfigType *wifiConfig;
-}Man_ConfigType;
-
-extern void Man_Init (const Man_ConfigType* ConfigPtr);
-extern void Man_Reset (void);
-
+extern void Man_Init (void);
+extern void Man_Reset (uint8_t FloorId);
+extern void Man_Poll_Plant (void);
+extern uint8_t Man_ChangeAuto (boolean val);
+extern uint8_t Man_ConfigAmoutFloor (uint8_t amount);
+extern void Man_ConfigActualGlobalTime (uint32_t ElapsedTimeinSecond);
+extern void Man_TimerHandler (void);
 #ifdef __cplusplus
 }
 #endif

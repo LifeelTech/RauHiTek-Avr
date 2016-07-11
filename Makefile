@@ -32,11 +32,13 @@ CINCLUDES = -I $(LIBDIR) \
 			-I out/light \
 			-I $(PLATFORMDIR)/.. \
 			-I $(AVRDIR)/libraries/SoftwareSerial/src/ \
+			-I $(AVRDIR)/libraries/Timer1 \
 			-I manager \
 			-I diagnostic \
 			-I app \
 			-I com/wireless \
-			-I in/humidity
+			-I in/humidity \
+			-I std
 
 #Define source code
 CSOURCES = in/thermistor/thermistor.c \
@@ -45,10 +47,13 @@ CSOURCES = in/thermistor/thermistor.c \
 			out/valve/valve.c \
 			out/light/light.c \
 			diagnostic/diagnostic.c \
-			in/humidity/humidity.c
+			in/humidity/humidity.c \
+			manager/man.c
 
 CXXSOURCES = app/main.cpp \
-			manager/man.cpp
+			com/wireless/wireless.cpp
+#			manager/man.cpp \
+
 
 LIBC = avr-lib.lib
 LIBCXX = avr-libxx.lib
@@ -58,13 +63,17 @@ LIBCSRCS = $(LIBDIR)/wiring.c \
 			$(LIBDIR)/WInterrupts.c \
 			$(LIBDIR)/hooks.c
 ifeq ($(DEBUG), 1)
-LIBCXXSRCS = $(AVRDIR)/libraries/SoftwareSerial/src/SoftwareSerial.cpp \
-			$(LIBDIR)/abi.cpp \
-			$(LIBDIR)/Print.cpp \
-			$(LIBDIR)/HardwareSerial.cpp \
+LIBCXXSRCS := $(LIBDIR)/HardwareSerial.cpp \
 			$(LIBDIR)/HardwareSerial0.cpp
-LIBCXXOBJS = $(subst .cpp,.o,$(LIBCXXSRCS))
 endif
+LIBCXXSRCS += $(AVRDIR)/libraries/SoftwareSerial/src/SoftwareSerial.cpp \
+			$(LIBDIR)/Wstring.cpp \
+			$(LIBDIR)/Print.cpp \
+			$(LIBDIR)/abi.cpp \
+			$(AVRDIR)/libraries/Timer1/TimerOne.cpp \
+			$(LIBDIR)/Stream.cpp
+LIBCXXOBJS = $(subst .cpp,.o,$(LIBCXXSRCS))
+
 LIBCOBJS = $(subst .c,.o,$(LIBCSRCS))
 COBJS = $(subst .c,.o,$(CSOURCES))
 CXXOBJS = $(subst .cpp,.o,$(CXXSOURCES))

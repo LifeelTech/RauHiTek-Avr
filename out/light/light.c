@@ -8,41 +8,65 @@
 #include "light.h"
 #include "Arduino.h"
 
-static uint8_t LigDPin = 0U;
+static const LighConfigSetType* Lig_ConfigPtr;
+static uint8_t LigLastChannel = 0U;
 static uint8_t Light_State = 0U;
 
 void
-Light_Init (uint8_t DigitalPin)
+Light_Init (const LighConfigSetType *cfgPtr)
 {
-	LigDPin = DigitalPin;
-	pinMode(LigDPin, OUTPUT);
-	Light_State = 1U;
+    uint8_t i = 0;
+    if (cfgPtr != NULL)
+    {
+        Lig_ConfigPtr = cfgPtr;
+        for (; i < Lig_ConfigPtr->num; i++)
+        {
+            pinMode(Lig_ConfigPtr->lighChannel[i].PinId, OUTPUT);
+        }
+        LigLastChannel = i - 1;
+        Light_State = 1U;
+    }
+    else
+    {
+        return;
+    }
+    Light_State = 1U;
 }
 
 uint8_t
-Light_Open (void)
+Light_Open (uint8_t channelId)
 {
-	uint8_t ret_val;
-	if (Light_State == 1U)
-	{
-		digitalWrite(LigDPin, HIGH);
-		ret_val = 1U;
-	}
-	else
-		ret_val = 0U;
-	return ret_val;
+    uint8_t ret_val;
+    if (Light_State == 1U)
+    {
+        if (channelId <= LigLastChannel)
+        {
+            digitalWrite(Lig_ConfigPtr->lighChannel[channelId].PinId, HIGH);
+            ret_val = 1U;
+        }
+        else
+            ret_val = 0U;
+    }
+    else
+        ret_val = 0U;
+    return ret_val;
 }
 
 uint8_t
-Light_Close (void)
+Light_Close (uint8_t channelId)
 {
-	uint8_t ret_val;
-	if (Light_State == 1U)
-	{
-		digitalWrite(LigDPin, LOW);
-		ret_val = 1U;
-	}
-	else
-		ret_val = 0U;
-	return ret_val;
+    uint8_t ret_val;
+    if (Light_State == 1U)
+    {
+        if (channelId <= LigLastChannel)
+        {
+            digitalWrite(Lig_ConfigPtr->lighChannel[channelId].PinId, LOW);
+            ret_val = 1U;
+        }
+        else
+            ret_val = 0U;
+    }
+    else
+        ret_val = 0U;
+    return ret_val;
 }

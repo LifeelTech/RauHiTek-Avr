@@ -5,10 +5,10 @@
  *      Author: Phu Quach
  */
 
-
 #include "stdlib.h"
 #include <Arduino.h>
 #include <util/delay.h>
+#include "TimerOne.h"
 
 #include "thermistor.h"
 #include "brightness.h"
@@ -16,84 +16,86 @@
 #include "valve.h"
 #include "light.h"
 #include "humidity.h"
-#include "man_cfg.h"
-//#include "wireless.h"
+#include "wireless.h"
 
 #include "man.h"
 
-/* List of used analog pins */
-#define	THERMISTOR_PIN		A0
-#define BRIGHTNESS_PIN		A1
-#define MOISTURE_PIN		A2
-#define VALVE_PIN			8
-#define LIGHT_PIN			9
+static uint32_t RxFlag = 0U;
+static uint16_t RxSourceId = 0U;
+static uint8_t RxCommand = 0U;
+void Wifi_RxHandler(uint16_t SourceId, uint8_t Command);
+
+static const Wifi_ConfigType wificfgset =
+{
+     2U,
+     3U,
+     "RauSachHiTek",
+     "0123456@mnbvc",
+     false,
+     "80",
+     &Wifi_RxHandler,
+     BAUDRATE_9600
+};
+
+SoftwareSerial esp8266(wificfgset.WifiRxPin, wificfgset.WifiTxPin);
 
 void initialization(void);
 void loop(void);
 
+void
+Wifi_RxHandler(uint16_t SourceId, uint8_t Command)
+{
+    RxFlag = 1U;
+    RxCommand = Command;
+    RxSourceId = SourceId;
+}
+
+void
+TIMER1_IRQHandler (void)
+{
+    Man_TimerHandler();
+}
+
 int
 main (void)
 {
-	/* Initialize port/pin */
-	initialization();
-#if defined(DEBUG_MODE)
-	Serial.begin(9600);
-	Serial.println("Initialized successful");
-#endif
-	while (1)
-	{
-		loop();
-	}
-	return 0;
+    /* Initialize port/pin */
+    initialization();
+    while (1)
+    {
+        loop();
+    }
+    return 0;
 }
 
 void
 initialization (void)
 {
-	init();
-	pinMode(13, OUTPUT);
-	Man_Init(&ManCfgSet);
+    init();
+#if defined(DEBUG_MODE)
+    Serial.begin(9600);
+    Serial.println("Initialized successful");
+#endif
+    Timer1.initialize(10000000);
+    Timer1.attachInterrupt(TIMER1_IRQHandler);
+    pinMode(13, OUTPUT);
+    pinMode(8, OUTPUT);
+    Man_Init();
+    delay(2000);
+    digitalWrite(8, HIGH);
+    esp8266.begin(9600);
+    Wifi_Init(&esp8266, &wificfgset);
 }
 
 void
 loop (void)
 {
-	float TherCelsius, BrightValue, MoistureValue;
-
-	TherCelsius = Ther_GetTempCelsius();
-	Serial.print("Temperature = ");
-	Serial.println(TherCelsius);
-	if (TherCelsius >= 30 && TherCelsius <= 50)
-	{
-		digitalWrite(13, HIGH);   // turn the LED on (HIGH is the voltage level)
-	}
-
-	BrightValue = Bri_GetBrightValue();
-	Serial.print("Brightness Value = ");
-	Serial.println(BrightValue);
-	if (BrightValue <= 1000)
-	{
-		Light_Open();
-	}
-
-	MoistureValue = Moi_GetMoistureValue();
-	Serial.print("Moisture Value = ");
-	Serial.println(MoistureValue);
-	if (MoistureValue < 300)
-	{
+    Man_Poll_Plant();
 #if defined(DEBUG_MODE)
-		//Serial.print("Open valve to supply more water.");
+    Serial.println("#######################################");
 #endif
-		Val_Open();
-	}
-	else
-	{
-#if defined(DEBUG_MODE)
-		//Serial.println("Enough water! Close valve.");
-#endif
-		Val_Close();
-	}
-	Serial.println("#######################################");
-	delay(1000);              // wait for a second
+    Wifi_MainFunction_Receive();
+    digitalWrite(13, LOW);
+    delay(1000);              // wait for a second
 }
 

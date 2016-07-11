@@ -6,14 +6,16 @@
  */
 
 #include "humidity.h"
+#include "diagnostic.h"
 
 void
-Hum_Init (uint8_t AnalogPin)
+Hum_Init (const HumiConfigSetType *cfgPtr)
 {
 
 }
-float
-Hum_GetHumidityValue (uint8_t AnalogPin)
-{
 
+float
+Hum_GetHumidityValue (uint8_t channelId)
+{
+    return 0;
 }

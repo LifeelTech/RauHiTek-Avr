@@ -8,14 +8,21 @@
 #ifndef RAUHITEK_AVR_BRIGHTNESS_BRIGHTNESS_H_
 #define RAUHITEK_AVR_BRIGHTNESS_BRIGHTNESS_H_
 
+#include "stdint.h"
+#include "std_types.h"
+
+typedef StdDeviceType BrightnessType;
+typedef struct {
+    uint8_t num;
+    const BrightnessType *brigChannel;
+}BrigConfigSetType;
+
 #ifdef __cplusplus
 extern "C"{
 #endif
 
-#include "stdint.h"
-
-extern void Bri_Init (uint8_t AnalogPin);
-extern float Bri_GetBrightValue (void);
+extern void Bri_Init (const BrigConfigSetType* cfgPtr);
+extern float Bri_GetBrightValue (uint8_t channelId);
 
 #ifdef __cplusplus
 }
